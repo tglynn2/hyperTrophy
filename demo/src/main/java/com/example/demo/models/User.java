@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import jakarta.annotation.Generated;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,4 +20,32 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference
     List<Day> days;
+
+    public User(){
+        
+    }
+
+    public UUID getId(){
+        return id;
+    }
+
+    public void setId(UUID id){
+        this.id = id;
+    }
+
+    public String getUsername(){
+      return username;  
+    }
+
+    public void setUsername(String username){
+        this.username = username;
+    }
+
+    public List<Day> getDays(){
+        return days;
+    }
+
+    public void setDays(List<Day> days){
+        this.days = days;
+    }
 }

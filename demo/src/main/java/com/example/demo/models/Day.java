@@ -2,9 +2,6 @@ package com.example.demo.models;
 
 import java.util.List;
 import java.util.UUID;
-
-import javax.annotation.processing.Generated;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -30,4 +27,40 @@ public class Day {
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Workout> workouts;
+
+    public Day(){
+        
+    }
+
+    public UUID getId(){
+        return id;
+    }
+
+    public void setId(UUID id){
+        this.id = id;
+    }
+
+    public User getUser(){
+        return this.user;
+    }
+
+    public void setUser(User user){
+        this.user = user;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public List<Workout> getWorkouts(){
+        return workouts;
+    }
+
+    public void setWorkout(List<Workout> workouts){
+        this.workouts = workouts;
+    }
 }

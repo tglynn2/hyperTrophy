@@ -27,5 +27,41 @@ public class Workout {
     String name;
     @OneToMany(mappedBy = "workout",cascade = CascadeType.ALL)
     @JsonManagedReference
-    List<Set> sets;
+    List<GymSet> sets;
+
+    public Workout(){
+        
+    }
+
+    public UUID getId(){
+        return id;
+    }
+
+    public void setId(UUID id){
+        this.id = id;
+    }
+
+    public Day getDay(){
+        return day;
+    }
+
+    public void setDay(Day day){
+        this.day = day;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public List<GymSet> getSets(){
+        return sets;
+    }
+
+    public void setSets(List<GymSet> sets){
+        this.sets = sets;
+    }
 }
