@@ -1,0 +1,24 @@
+2026-02-06 23:15:19.132432-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table [*]day (id uuid not null, name varchar(255), u_id uuid, primary key (id))"; expected "identifier"; SQL statement:
+create table day (id uuid not null, name varchar(255), u_id uuid, primary key (id)) [42001-240]
+2026-02-06 23:15:19.144483-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table [*]user (id uuid not null, username varchar(255), primary key (id))"; expected "identifier"; SQL statement:
+create table user (id uuid not null, username varchar(255), primary key (id)) [42001-240]
+2026-02-06 23:15:19.149494-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists [*]day add constraint FKdpuhvc3uekpykiughtufdp0v1 foreign key (u_id) references user"; expected "identifier"; SQL statement:
+alter table if exists day add constraint FKdpuhvc3uekpykiughtufdp0v1 foreign key (u_id) references user [42001-240]
+2026-02-06 23:15:19.157768-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists workout add constraint FKp3ldgqeoihh46voxwurmdsxgx foreign key (d_id) references [*]day"; expected "identifier"; SQL statement:
+alter table if exists workout add constraint FKp3ldgqeoihh46voxwurmdsxgx foreign key (d_id) references day [42001-240]
+2026-02-06 23:27:29.202516-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table [*]day (id uuid not null, name varchar(255), u_id uuid, primary key (id))"; expected "identifier"; SQL statement:
+create table day (id uuid not null, name varchar(255), u_id uuid, primary key (id)) [42001-240]
+2026-02-06 23:27:29.211516-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "create table [*]user (id uuid not null, username varchar(255), primary key (id))"; expected "identifier"; SQL statement:
+create table user (id uuid not null, username varchar(255), primary key (id)) [42001-240]
+2026-02-06 23:27:29.214533-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists [*]day add constraint FKdpuhvc3uekpykiughtufdp0v1 foreign key (u_id) references user"; expected "identifier"; SQL statement:
+alter table if exists day add constraint FKdpuhvc3uekpykiughtufdp0v1 foreign key (u_id) references user [42001-240]
+2026-02-06 23:27:29.219710-05:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "alter table if exists workout add constraint FKp3ldgqeoihh46voxwurmdsxgx foreign key (d_id) references [*]day"; expected "identifier"; SQL statement:
+alter table if exists workout add constraint FKp3ldgqeoihh46voxwurmdsxgx foreign key (d_id) references day [42001-240]

@@ -10,12 +10,13 @@ import com.example.demo.models.Day;
 import com.example.demo.repositories.DayRepository;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 @Service
 public class DayService {
     private final DayRepository dayRepository;
 
-    @PersistanceContext
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
