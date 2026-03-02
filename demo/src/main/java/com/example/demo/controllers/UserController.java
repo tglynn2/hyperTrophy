@@ -35,6 +35,8 @@ public class UserController {
     @Autowired
     WorkoutService workoutService;
 
+    //Test for new machine
+
     @PostMapping("/create")
     public User createUser(@RequestParam(required = true) String username){
         User user = new User();
