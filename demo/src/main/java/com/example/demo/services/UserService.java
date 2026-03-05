@@ -6,7 +6,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.models.Day;
+import com.example.demo.models.GymSet;
 import com.example.demo.models.User;
+import com.example.demo.models.Workout;
 import com.example.demo.repositories.UserRepository;
 
 import jakarta.persistence.EntityManager;
@@ -60,6 +63,61 @@ public class UserService {
         u.setDays(user.getDays());
         u.setUsername(user.getUsername());
         return userRepository.save(u);
+    }
+
+    public Day createDayForUser(UUID id, String name) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day day = new Day();
+        day.setName(name);
+        day.setUser(user);
+        user.getDays().add(day);
+        saveUser(user);
+        return user.getDays().getLast();
+    }
+
+    public Workout createWorkoutForUser(UUID id, String dayName, String workoutName) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        Workout workout = new Workout();
+        workout.setDay(foundDay);
+        workout.setName(workoutName);
+        foundDay.getWorkouts().add(workout);
+        user.getDays().add(foundDay);
+        saveUser(user);
+        return user.getDays().getLast().getWorkouts().getLast();
+    }
+
+    public GymSet createSetForUser(UUID id, String dayName, String workoutName, GymSet gymSet) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = foundDay.getWorkouts().stream()
+        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        if(foundWorkout == null){
+            return null;
+        }
+        gymSet.setWorkout(foundWorkout);
+        foundWorkout.getSets().add(gymSet);
+        foundDay.getWorkouts().add(foundWorkout);
+        user.getDays().add(foundDay);
+        saveUser(user);
+        return user.getDays().getLast().getWorkouts().getLast().getSets().getLast();
     }
     
 }

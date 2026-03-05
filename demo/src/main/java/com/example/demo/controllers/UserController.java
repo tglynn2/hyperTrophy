@@ -14,9 +14,7 @@ import com.example.demo.models.Day;
 import com.example.demo.models.GymSet;
 import com.example.demo.models.User;
 import com.example.demo.models.Workout;
-import com.example.demo.services.DayService;
 import com.example.demo.services.UserService;
-import com.example.demo.services.WorkoutService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -28,12 +26,6 @@ public class UserController {
 
     @Autowired 
     UserService userService;
-
-    @Autowired
-    DayService dayService;
-
-    @Autowired
-    WorkoutService workoutService;
 
     //Test for new machine
 
@@ -53,25 +45,21 @@ public class UserController {
         }
         return user;
     }
-    
+
     @PostMapping("/create/day")
-    public ResponseEntity<?> createDay(HttpServletRequest request,
-        @RequestParam(required = true) String name){
+    public ResponseEntity<?> createDay(HttpServletRequest request, @RequestParam(required = true) String name){
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login First");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        User user = userService.findById(id).orElse(null);
-        Day day = new Day();
-        day.setName(name);
-        day.setUser(user);
-        List<Day> days =  user.getDays();
-        days.add(day);
-        user.setDays(days);
-        userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        Day day = userService.createDayForUser(id,name);
+        if(day == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(day);
     }
+    
 
     @PostMapping("/create/workout")
     public ResponseEntity<?> createWorkout(HttpServletRequest request,
@@ -82,15 +70,11 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        User user = userService.findById(id).orElse(null);
-        Day day = dayService.getDayByName(dayName).orElse(null);
-        Workout workout = new Workout();
-        workout.setDay(day);
-        workout.setName(workoutName);
-        day.getWorkouts().add(workout);
-        user.getDays().add(day);
-        userService.saveUser(user);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        Workout workout = userService.createWorkoutForUser(id, dayName, workoutName);
+        if(workout == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Day doesn't exist");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(workout);
     }
 
     @RequestMapping("/create/set")
@@ -103,14 +87,12 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
             }
             UUID id = UUID.fromString(session.getAttribute("id").toString());
-            User user = userService.findById(id).orElse(null);
-            Day day = dayService.getDayByName(dayName).orElse(null);
-            Workout workout = workoutService.findByName(workoutName).orElse(null);
-            gymSet.setWorkout(workout);
-            workout.getSets().add(gymSet);
-            day.getWorkouts().add(workout);
-            user.getDays().add(day);
-            userService.saveUser(user);
-            return ResponseEntity.status(HttpStatus.OK).body(user);    
+            GymSet g = userService.createSetForUser(id, dayName, workoutName, gymSet);
+            if(g == null){
+                //This is gross, will eventually throw an exception with information about which wasn't found
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, or Workout doesn't exist");
+            }
+            return ResponseEntity.status(HttpStatus.CREATED).body(g);
+               
         }
 }
