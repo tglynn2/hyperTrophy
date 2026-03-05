@@ -18,7 +18,6 @@ import com.example.demo.services.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import java.util.List;
 
 @RequestMapping("/users")
 @RestController
