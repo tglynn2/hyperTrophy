@@ -1,7 +1,10 @@
 package com.example.demo.services;
 
+import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -118,6 +121,100 @@ public class UserService {
         user.getDays().add(foundDay);
         saveUser(user);
         return user.getDays().getLast().getWorkouts().getLast().getSets().getLast();
+    }
+
+    public List<Day> getDaysForUser(UUID id) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        return user.getDays();    
+    }
+
+    public Day getDayForUser(UUID id, String dayName) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        return foundDay;
+    }
+
+    public List<Workout> getWorkoutsForUser(UUID id, String dayName) {
+         User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        return foundDay.getWorkouts();  
+    }
+
+    public Workout getWorkoutForUser(UUID id, String dayName, String workoutName) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = foundDay.getWorkouts().stream()
+        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        if(foundWorkout == null){
+            return null;
+        }
+        return foundWorkout;
+    }
+
+    public List<GymSet> getSetsForUser(UUID id, String dayName, String workoutName, Date date) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = foundDay.getWorkouts().stream()
+        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        if(foundWorkout == null){
+            return null;
+        }
+        List<GymSet> foundSets = foundWorkout.getSets().stream()
+        .filter(sets -> sets.getDate().equals(date)).collect(Collectors.toList());
+        if(foundSets == null){
+            return null;
+        }
+        return foundSets;
+        
+    }
+
+    public List<GymSet> getAllSetsForUser(UUID id, String dayName, String workoutName) {
+         User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = user.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = foundDay.getWorkouts().stream()
+        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        if(foundWorkout == null){
+            return null;
+        }
+        return foundWorkout.getSets();
     }
     
 }
