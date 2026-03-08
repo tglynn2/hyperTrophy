@@ -57,14 +57,13 @@ public class UserService {
         return true;
     }
 
-    public User updateUserById(UUID id, User user){
+    public User updateUserById(UUID id, String newUsername){
         Optional<User> opt = findById(id);
         if(opt.isEmpty()){
             return null;
         }
         User u = opt.get();
-        u.setDays(user.getDays());
-        u.setUsername(user.getUsername());
+        u.setUsername(newUsername);
         return userRepository.save(u);
     }
 
@@ -215,6 +214,66 @@ public class UserService {
             return null;
         }
         return foundWorkout.getSets();
+    }
+
+    public Day updateDayForUser(UUID id, String oldDayName, String newDayName) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = getDayForUser(id, newDayName);
+        foundDay.setName(newDayName);
+        user.getDays().add(foundDay);
+        saveUser(user);
+        return user.getDays().getLast();
+    }
+
+    public Workout updateWorkoutForUser(UUID id, String dayName, String oldWorkoutName, String newWorkoutName) {
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = getDayForUser(id, dayName);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = getWorkoutForUser(id, dayName, oldWorkoutName);
+        if(foundWorkout == null){
+            return null;
+        }
+        foundWorkout.setName(newWorkoutName);
+        foundDay.getWorkouts().add(foundWorkout);
+        user.getDays().add(foundDay);
+        saveUser(user);
+        return foundWorkout;
+    }
+
+    public GymSet updateGymsetForUser(UUID userId, String dayName, String workoutName, UUID setId, GymSet gymSet){
+        User user = findById(userId).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day foundDay = getDayForUser(userId, dayName);
+        if(foundDay == null){
+            return null;
+        }
+        Workout foundWorkout = getWorkoutForUser(userId, dayName, workoutName);
+        if(foundWorkout == null){
+            return null;
+        }
+        GymSet foundSet = foundWorkout.getSets().stream()
+        .filter(sets -> sets.getId().equals(setId)).findFirst().orElse(null);
+        if(foundSet == null){
+            return null;
+        }
+        foundSet.setDate(gymSet.getDate());
+        foundSet.setReps(gymSet.getReps());
+        foundSet.setWeight(gymSet.getWeight());
+        foundWorkout.getSets().add(foundSet);
+        foundDay.getWorkouts().add(foundWorkout);
+        user.getDays().add(foundDay);
+        saveUser(user);
+        return foundSet;    
     }
     
 }

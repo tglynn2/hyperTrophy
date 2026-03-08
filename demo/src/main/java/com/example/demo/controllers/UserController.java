@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,8 +31,6 @@ public class UserController {
 
     @Autowired 
     UserService userService;
-
-    //Test for new machine
 
     @PostMapping("/create")
     public User createUser(@RequestParam(required = true) String username){
@@ -142,7 +142,9 @@ public class UserController {
     }
     
     @GetMapping("/search/workout")
-    public ResponseEntity<?> getWorkout(HttpServletRequest request, @RequestParam(required = true) String dayName, @RequestParam(required = true) String workoutName){
+    public ResponseEntity<?> getWorkout(HttpServletRequest request,
+        @RequestParam(required = true) String dayName, 
+        @RequestParam(required = true) String workoutName){
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
@@ -156,7 +158,10 @@ public class UserController {
     }
 
     @GetMapping("/search/sets")
-    public ResponseEntity<?> getSets(HttpServletRequest request, @RequestParam(required = true) String dayName, @RequestParam(required = true) String workoutName, @RequestParam Date date){
+    public ResponseEntity<?> getSets(HttpServletRequest request,
+         @RequestParam(required = true) String dayName, 
+         @RequestParam(required = true) String workoutName,
+         @RequestParam Date date){
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
@@ -169,8 +174,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(sets);
     }
 
-     @GetMapping("/search/all-sets")
-    public ResponseEntity<?> getAllSets(HttpServletRequest request, @RequestParam(required = true) String dayName, @RequestParam(required = true) String workoutName){
+    @GetMapping("/search/all-sets")
+    public ResponseEntity<?> getAllSets(HttpServletRequest request, 
+        @RequestParam(required = true) String dayName,
+        @RequestParam(required = true) String workoutName){
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
@@ -183,5 +190,68 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(sets);
     }
 
+    @PutMapping("/update/user")
+    public ResponseEntity<?> updateUser(HttpServletRequest request, @RequestParam(required = true) String newUsername){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        User updatedUser = userService.updateUserById(id, newUsername);
+        if(updatedUser == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+    }
 
+    @PutMapping("/update/day")
+    public ResponseEntity<?> updateDay(HttpServletRequest request,
+        @RequestParam(required = true) String oldDayName,
+        @RequestParam(required = true) String newDayName){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Day updatedDay = userService.updateDayForUser(id, oldDayName, newDayName);
+        if(updatedDay == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Day not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedDay);
+    }
+
+    @PutMapping("/update/workout")
+    public ResponseEntity<?> updateWorkout(HttpServletRequest request,
+        @RequestParam(required = true) String dayName,
+        @RequestParam(required = true) String oldWorkoutName, 
+        @RequestParam(required = true) String newWorkoutName){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Workout updatedWorkout = userService.updateWorkoutForUser(id, dayName, oldWorkoutName, newWorkoutName);
+        if(updatedWorkout == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, or Workout not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedWorkout);
+    }
+
+    @PutMapping("/update/set/{setId}")
+    public ResponseEntity<?> updateSet(HttpServletRequest request,
+        @RequestParam(required = true) String dayName, 
+        @RequestParam(required = true) String workoutName, 
+        @RequestBody(required = true) GymSet gymSet,
+        @PathVariable("setId") UUID setId){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        GymSet updatedSet = userService.updateGymsetForUser(id, dayName, workoutName,setId,gymSet);
+        if(updatedSet == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, Workout, or Set not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(updatedSet);
+    }
 }
