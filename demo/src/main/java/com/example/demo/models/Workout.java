@@ -1,7 +1,9 @@
 package com.example.demo.models;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -65,5 +67,17 @@ public class Workout {
 
     public void setSets(List<GymSet> sets){
         this.sets = sets;
+    }
+
+    public List<GymSet> getSetsByDate(Date date){
+        List<GymSet> foundSets = this.getSets().stream()
+        .filter(sets -> sets.getDate().equals(date)).collect(Collectors.toList());
+        return foundSets;
+    }
+
+    public GymSet getSetById(UUID id){
+        GymSet gymSet = this.getSets().stream()
+        .filter(sets -> sets.getId().equals(id)).findFirst().orElse(null);
+        return gymSet;
     }
 }

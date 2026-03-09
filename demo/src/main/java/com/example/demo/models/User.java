@@ -50,4 +50,10 @@ public class User {
     public void setDays(List<Day> days){
         this.days = days;
     }
+
+    public Day getParticularDay(String dayName){
+         Day foundDay = this.getDays().stream()
+        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        return foundDay;
+    }
 }

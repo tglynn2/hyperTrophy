@@ -85,8 +85,7 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
@@ -104,13 +103,11 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = foundDay.getWorkouts().stream()
-        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
             return null;
         }
@@ -135,8 +132,7 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
@@ -148,8 +144,7 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
@@ -161,13 +156,11 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = foundDay.getWorkouts().stream()
-        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
             return null;
         }
@@ -179,23 +172,19 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = foundDay.getWorkouts().stream()
-        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
             return null;
         }
-        List<GymSet> foundSets = foundWorkout.getSets().stream()
-        .filter(sets -> sets.getDate().equals(date)).collect(Collectors.toList());
+        List<GymSet> foundSets = foundWorkout.getSetsByDate(date);
         if(foundSets == null){
             return null;
         }
         return foundSets;
-        
     }
 
     public List<GymSet> getAllSetsForUser(UUID id, String dayName, String workoutName) {
@@ -203,13 +192,11 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getDays().stream()
-        .filter(day -> day.getName().equals(dayName)).findFirst().orElse(null);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = foundDay.getWorkouts().stream()
-        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
             return null;
         }
@@ -221,7 +208,7 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = getDayForUser(id, newDayName);
+        Day foundDay = user.getParticularDay(newDayName);
         foundDay.setName(newDayName);
         user.getDays().add(foundDay);
         saveUser(user);
@@ -233,11 +220,11 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = getDayForUser(id, dayName);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = getWorkoutForUser(id, dayName, oldWorkoutName);
+        Workout foundWorkout = foundDay.getParticularWorkout(newWorkoutName);
         if(foundWorkout == null){
             return null;
         }
@@ -253,16 +240,15 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = getDayForUser(userId, dayName);
+        Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = getWorkoutForUser(userId, dayName, workoutName);
+        Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
             return null;
         }
-        GymSet foundSet = foundWorkout.getSets().stream()
-        .filter(sets -> sets.getId().equals(setId)).findFirst().orElse(null);
+        GymSet foundSet = foundWorkout.getSetById(setId);
         if(foundSet == null){
             return null;
         }

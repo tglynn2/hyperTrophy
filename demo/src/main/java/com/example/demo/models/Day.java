@@ -65,4 +65,10 @@ public class Day {
     public void setWorkout(List<Workout> workouts){
         this.workouts = workouts;
     }
+
+     public Workout getParticularWorkout(String workoutName){
+         Workout foundWorkout = this.getWorkouts().stream()
+        .filter(workout -> workout.getName().equals(workoutName)).findFirst().orElse(null);
+        return foundWorkout;
+    }
 }
