@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -253,5 +254,66 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, Workout, or Set not found");
         }
         return ResponseEntity.status(HttpStatus.OK).body(updatedSet);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Boolean result = userService.deleteUser(id);
+        if(result == null||!result){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+    }
+
+    @DeleteMapping("/delete/day")
+    public ResponseEntity<?> deleteDay(HttpServletRequest request, @RequestParam(required = true) String dayName){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Boolean result = userService.deleteDay(id, dayName);
+        if(result == null||!result){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or day not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+    }
+
+    @DeleteMapping("/delete/workout")
+    public ResponseEntity<?> deleteWorkout(HttpServletRequest request,
+        @RequestParam(required = true) String dayName,
+        @RequestParam(required = true) String workoutName){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Boolean result = userService.deleteWorkout(id, dayName,workoutName);
+        if(result == null||!result){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, day, or workout not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+    }
+
+    @DeleteMapping("/delete/set/{setId}")
+    public ResponseEntity<?> deleteSet(HttpServletRequest request,
+        @RequestParam(required = true) String dayName,
+        @RequestParam(required = true) String workoutName,
+        @PathVariable("setId") UUID setId){
+        HttpSession session = request.getSession(false);
+        if(session == null || session.getAttribute("id") == null){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
+        }
+        UUID id = UUID.fromString(session.getAttribute("id").toString());
+        Boolean result = userService.deleteSet(id, dayName,workoutName,setId);
+        if(result == null||!result){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, day, workout, or set not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
     }
 }

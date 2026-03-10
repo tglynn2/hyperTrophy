@@ -261,5 +261,70 @@ public class UserService {
         saveUser(user);
         return foundSet;    
     }
-    
+
+    public Boolean deleteUser(UUID id){
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Boolean result = deleteUserById(id);
+        return result;
+    }
+
+    public Boolean deleteDay(UUID id, String dayName){
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day dayToDelete = user.getParticularDay(dayName);
+        if(dayToDelete == null){
+            return null;
+        }
+        Boolean result = user.getDays().remove(dayToDelete);
+        saveUser(user);
+        return result;
+    }
+
+    public Boolean deleteWorkout(UUID id, String dayName, String workoutName){
+        User user = findById(id).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day dayWithWorkout = user.getParticularDay(dayName);
+        if(dayWithWorkout == null){
+            return null;
+        }
+        Workout workoutToDelete = dayWithWorkout.getParticularWorkout(workoutName);
+        if(workoutToDelete == null){
+            return null;
+        }
+        Boolean result = dayWithWorkout.getWorkouts().remove(workoutToDelete);
+        user.getDays().add(dayWithWorkout);
+        saveUser(user);
+        return result;
+    }
+
+    public Boolean deleteSet(UUID userId, String dayName, String workoutName, UUID setId){
+        User user = findById(userId).orElse(null);
+        if(user == null){
+            return null;
+        }
+        Day dayWithWorkout = user.getParticularDay(dayName);
+        if(dayWithWorkout == null){
+            return null;
+        }
+        Workout workoutWithSet = dayWithWorkout.getParticularWorkout(workoutName);
+        if(workoutWithSet == null){
+            return null;
+        }
+        GymSet setToDelete = workoutWithSet.getSetById(setId);
+        if(setToDelete == null){
+            return null;
+        }
+        Boolean result = workoutWithSet.getSets().remove(setToDelete);
+        dayWithWorkout.getWorkouts().add(workoutWithSet);
+        user.getDays().add(dayWithWorkout);
+        saveUser(user);
+        return result;
+    }
 }
