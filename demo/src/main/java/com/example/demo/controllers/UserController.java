@@ -34,20 +34,23 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/create")
-    public User createUser(@RequestParam(required = true) String username){
-        User user = new User();
-        user.setUsername(username);
-        return userService.saveUser(user);
+    public ResponseEntity<?> createUser(@RequestParam(required = true) String username){
+        User user = userService.createUser(username);
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User with that username already exists");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PostMapping("/login")
-    public User login(@RequestParam(required = true) String username,
+    public ResponseEntity<?> login(@RequestParam(required = true) String username,
         HttpServletRequest request){
         User user = userService.getUserByUsername(username).orElse(null);
-        if(user != null){
-            request.getSession().setAttribute("id", user.getId());
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");   
         }
-        return user;
+        request.getSession().setAttribute("id", user.getId());
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     @PostMapping("/create/day")

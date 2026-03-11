@@ -26,7 +26,7 @@ public class Day {
     @JsonBackReference
     private User user;
     private String name;
-    @OneToMany(mappedBy = "day", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "day", cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonManagedReference
     private List<Workout> workouts;
 

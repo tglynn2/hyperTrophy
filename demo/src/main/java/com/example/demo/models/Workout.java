@@ -29,7 +29,7 @@ public class Workout {
     @JsonBackReference
     Day day;
     String name;
-    @OneToMany(mappedBy = "workout",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "workout",cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     List<GymSet> sets;
 

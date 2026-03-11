@@ -19,7 +19,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     UUID id;
     String username;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     List<Day> days;
 

@@ -17,6 +17,7 @@ import com.example.demo.repositories.UserRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -65,6 +66,17 @@ public class UserService {
         User u = opt.get();
         u.setUsername(newUsername);
         return userRepository.save(u);
+    }
+
+    public User createUser(String username) {
+        User user = getUserByUsername(username).orElse(null);
+        if(user == null){
+            User newUser = new User();
+            newUser.setUsername(username);
+            saveUser(newUser);
+            return newUser;
+        }      
+        return null;
     }
 
     public Day createDayForUser(UUID id, String name) {
@@ -208,7 +220,10 @@ public class UserService {
         if(user == null){
             return null;
         }
-        Day foundDay = user.getParticularDay(newDayName);
+        Day foundDay = user.getParticularDay(oldDayName);
+        if(foundDay == null){
+            return null;
+        }
         foundDay.setName(newDayName);
         user.getDays().add(foundDay);
         saveUser(user);
@@ -224,7 +239,7 @@ public class UserService {
         if(foundDay == null){
             return null;
         }
-        Workout foundWorkout = foundDay.getParticularWorkout(newWorkoutName);
+        Workout foundWorkout = foundDay.getParticularWorkout(oldWorkoutName);
         if(foundWorkout == null){
             return null;
         }
@@ -261,7 +276,8 @@ public class UserService {
         saveUser(user);
         return foundSet;    
     }
-
+    
+    @Transactional
     public Boolean deleteUser(UUID id){
         User user = findById(id).orElse(null);
         if(user == null){
@@ -271,6 +287,7 @@ public class UserService {
         return result;
     }
 
+    @Transactional
     public Boolean deleteDay(UUID id, String dayName){
         User user = findById(id).orElse(null);
         if(user == null){
@@ -281,10 +298,10 @@ public class UserService {
             return null;
         }
         Boolean result = user.getDays().remove(dayToDelete);
-        saveUser(user);
         return result;
     }
 
+    @Transactional
     public Boolean deleteWorkout(UUID id, String dayName, String workoutName){
         User user = findById(id).orElse(null);
         if(user == null){
@@ -299,11 +316,10 @@ public class UserService {
             return null;
         }
         Boolean result = dayWithWorkout.getWorkouts().remove(workoutToDelete);
-        user.getDays().add(dayWithWorkout);
-        saveUser(user);
         return result;
     }
 
+    @Transactional
     public Boolean deleteSet(UUID userId, String dayName, String workoutName, UUID setId){
         User user = findById(userId).orElse(null);
         if(user == null){
@@ -322,9 +338,6 @@ public class UserService {
             return null;
         }
         Boolean result = workoutWithSet.getSets().remove(setToDelete);
-        dayWithWorkout.getWorkouts().add(workoutWithSet);
-        user.getDays().add(dayWithWorkout);
-        saveUser(user);
         return result;
     }
 }
