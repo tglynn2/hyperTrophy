@@ -1,7 +1,6 @@
 package com.example.demo.controllers;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,8 @@ public class UserController {
         UUID id = UUID.fromString(session.getAttribute("id").toString());
         Day day = userService.createDayForUser(id,name);
         if(day == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            //Again this is gross will throw custom exception eventually
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found or day already exists");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(day);
     }
@@ -267,7 +267,7 @@ public class UserController {
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
         Boolean result = userService.deleteUser(id);
-        if(result == null||!result){
+        if(!result||result == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");

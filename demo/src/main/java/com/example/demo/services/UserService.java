@@ -49,15 +49,6 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    public Boolean deleteUserById(UUID id){
-        Optional<User> opt = findById(id);
-        if(opt.isEmpty()){
-            return false;
-        }
-        userRepository.deleteById(id);
-        return true;
-    }
-
     public User updateUserById(UUID id, String newUsername){
         Optional<User> opt = findById(id);
         if(opt.isEmpty()){
@@ -84,12 +75,16 @@ public class UserService {
         if(user == null){
             return null;
         }
+        Day doesThisExist = user.getParticularDay(name);
+        if(doesThisExist==null){
         Day day = new Day();
         day.setName(name);
         day.setUser(user);
         user.getDays().add(day);
         saveUser(user);
         return user.getDays().getLast();
+        }
+        return null;
     }
 
     public Workout createWorkoutForUser(UUID id, String dayName, String workoutName) {
@@ -101,6 +96,8 @@ public class UserService {
         if(foundDay == null){
             return null;
         }
+        Workout doesThisExist = foundDay.getParticularWorkout(workoutName);
+        if(doesThisExist == null){
         Workout workout = new Workout();
         workout.setDay(foundDay);
         workout.setName(workoutName);
@@ -108,6 +105,8 @@ public class UserService {
         user.getDays().add(foundDay);
         saveUser(user);
         return user.getDays().getLast().getWorkouts().getLast();
+        }
+        return null;
     }
 
     public GymSet createSetForUser(UUID id, String dayName, String workoutName, GymSet gymSet) {
@@ -281,10 +280,10 @@ public class UserService {
     public Boolean deleteUser(UUID id){
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            return false;
         }
-        Boolean result = deleteUserById(id);
-        return result;
+        userRepository.deleteById(id);
+        return true;
     }
 
     @Transactional
