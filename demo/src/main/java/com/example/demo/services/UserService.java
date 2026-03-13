@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,13 +49,16 @@ public class UserService {
     }
 
     public User updateUserById(UUID id, String newUsername){
-        Optional<User> opt = findById(id);
-        if(opt.isEmpty()){
-            return null;
+        User user = findById(id).orElse(null);
+        if(user == null){
+            throw new NullPointerException("This user does not exist");
         }
-        User u = opt.get();
-        u.setUsername(newUsername);
-        return userRepository.save(u);
+        User doesThisAlreadyExist = getUserByUsername(newUsername).orElse(null);
+        if(doesThisAlreadyExist == null){
+            user.setUsername(newUsername);
+            return userRepository.save(user);
+        }
+        throw new IllegalArgumentException("This username is already taken");
     }
 
     public User createUser(String username) {
@@ -73,54 +75,54 @@ public class UserService {
     public Day createDayForUser(UUID id, String name) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("A user with this name does not exist");
         }
         Day doesThisExist = user.getParticularDay(name);
         if(doesThisExist==null){
-        Day day = new Day();
-        day.setName(name);
-        day.setUser(user);
-        user.getDays().add(day);
-        saveUser(user);
-        return user.getDays().getLast();
-        }
-        return null;
+            Day day = new Day();
+            day.setName(name);
+            day.setUser(user);
+            user.getDays().add(day);
+            saveUser(user);
+            return user.getDays().getLast();
+        }  
+        throw new IllegalArgumentException("A day with this name already exists");
     }
 
     public Workout createWorkoutForUser(UUID id, String dayName, String workoutName) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout doesThisExist = foundDay.getParticularWorkout(workoutName);
         if(doesThisExist == null){
-        Workout workout = new Workout();
-        workout.setDay(foundDay);
-        workout.setName(workoutName);
-        foundDay.getWorkouts().add(workout);
-        user.getDays().add(foundDay);
-        saveUser(user);
-        return user.getDays().getLast().getWorkouts().getLast();
+            Workout workout = new Workout();
+            workout.setDay(foundDay);
+            workout.setName(workoutName);
+            foundDay.getWorkouts().add(workout);
+            user.getDays().add(foundDay);
+            saveUser(user);
+            return user.getDays().getLast().getWorkouts().getLast();
         }
-        return null;
+        throw new IllegalArgumentException("A workout with this name already exists");
     }
 
     public GymSet createSetForUser(UUID id, String dayName, String workoutName, GymSet gymSet) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
         gymSet.setWorkout(foundWorkout);
         foundWorkout.getSets().add(gymSet);
@@ -133,7 +135,7 @@ public class UserService {
     public List<Day> getDaysForUser(UUID id) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         return user.getDays();    
     }
@@ -141,11 +143,11 @@ public class UserService {
     public Day getDayForUser(UUID id, String dayName) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         return foundDay;
     }
@@ -153,11 +155,11 @@ public class UserService {
     public List<Workout> getWorkoutsForUser(UUID id, String dayName) {
          User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         return foundDay.getWorkouts();  
     }
@@ -165,15 +167,15 @@ public class UserService {
     public Workout getWorkoutForUser(UUID id, String dayName, String workoutName) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
         return foundWorkout;
     }
@@ -181,35 +183,31 @@ public class UserService {
     public List<GymSet> getSetsForUser(UUID id, String dayName, String workoutName, Date date) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
-        List<GymSet> foundSets = foundWorkout.getSetsByDate(date);
-        if(foundSets == null){
-            return null;
-        }
-        return foundSets;
+        return foundWorkout.getSetsByDate(date);
     }
 
     public List<GymSet> getAllSetsForUser(UUID id, String dayName, String workoutName) {
          User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
         return foundWorkout.getSets();
     }
@@ -217,54 +215,62 @@ public class UserService {
     public Day updateDayForUser(UUID id, String oldDayName, String newDayName) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(oldDayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
-        foundDay.setName(newDayName);
-        user.getDays().add(foundDay);
-        saveUser(user);
-        return user.getDays().getLast();
+        Day doesThisExistAlready = user.getParticularDay(newDayName);
+        if(doesThisExistAlready == null){
+            foundDay.setName(newDayName);
+            user.getDays().add(foundDay);
+            saveUser(user);
+            return user.getDays().getLast();
+        }
+        throw new IllegalArgumentException("A day with this name already exists");
     }
 
     public Workout updateWorkoutForUser(UUID id, String dayName, String oldWorkoutName, String newWorkoutName) {
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(oldWorkoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
-        foundWorkout.setName(newWorkoutName);
-        foundDay.getWorkouts().add(foundWorkout);
-        user.getDays().add(foundDay);
-        saveUser(user);
-        return foundWorkout;
+        Workout doesThisAlreadyExist = foundDay.getParticularWorkout(newWorkoutName);
+        if(doesThisAlreadyExist == null){
+            foundWorkout.setName(newWorkoutName);
+            foundDay.getWorkouts().add(foundWorkout);
+            user.getDays().add(foundDay);
+            saveUser(user);
+            return foundWorkout;
+        }
+        throw new IllegalArgumentException("A workout with this name already exists");
     }
 
     public GymSet updateGymsetForUser(UUID userId, String dayName, String workoutName, UUID setId, GymSet gymSet){
         User user = findById(userId).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day foundDay = user.getParticularDay(dayName);
         if(foundDay == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout foundWorkout = foundDay.getParticularWorkout(workoutName);
         if(foundWorkout == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
         GymSet foundSet = foundWorkout.getSetById(setId);
         if(foundSet == null){
-            return null;
+            throw new NullPointerException("A set with this id does not exist");
         }
         foundSet.setDate(gymSet.getDate());
         foundSet.setReps(gymSet.getReps());
@@ -290,53 +296,50 @@ public class UserService {
     public Boolean deleteDay(UUID id, String dayName){
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day dayToDelete = user.getParticularDay(dayName);
         if(dayToDelete == null){
-            return null;
+            throw new NullPointerException("This day does not exist");
         }
-        Boolean result = user.getDays().remove(dayToDelete);
-        return result;
+        return user.getDays().remove(dayToDelete);
     }
 
     @Transactional
     public Boolean deleteWorkout(UUID id, String dayName, String workoutName){
         User user = findById(id).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day dayWithWorkout = user.getParticularDay(dayName);
         if(dayWithWorkout == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout workoutToDelete = dayWithWorkout.getParticularWorkout(workoutName);
         if(workoutToDelete == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
-        Boolean result = dayWithWorkout.getWorkouts().remove(workoutToDelete);
-        return result;
+        return dayWithWorkout.getWorkouts().remove(workoutToDelete);
     }
 
     @Transactional
     public Boolean deleteSet(UUID userId, String dayName, String workoutName, UUID setId){
         User user = findById(userId).orElse(null);
         if(user == null){
-            return null;
+            throw new NullPointerException("This user does not exist");
         }
         Day dayWithWorkout = user.getParticularDay(dayName);
         if(dayWithWorkout == null){
-            return null;
+            throw new NullPointerException("A day with this name does not exist");
         }
         Workout workoutWithSet = dayWithWorkout.getParticularWorkout(workoutName);
         if(workoutWithSet == null){
-            return null;
+            throw new NullPointerException("A workout with this name does not exist");
         }
         GymSet setToDelete = workoutWithSet.getSetById(setId);
         if(setToDelete == null){
-            return null;
+            throw new NullPointerException("A set with this id does not exist");
         }
-        Boolean result = workoutWithSet.getSets().remove(setToDelete);
-        return result;
+        return workoutWithSet.getSets().remove(setToDelete);
     }
 }

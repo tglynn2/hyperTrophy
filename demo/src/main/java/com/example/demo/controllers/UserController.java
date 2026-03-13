@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ import com.example.demo.services.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RequestMapping("/users")
 @RestController
@@ -59,12 +61,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Day day = userService.createDayForUser(id,name);
-        if(day == null){
-            //Again this is gross will throw custom exception eventually
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found or day already exists");
+        try{
+            Day day = userService.createDayForUser(id,name);
+            return ResponseEntity.status(HttpStatus.CREATED).body(day);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(day);
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
     
 
@@ -77,16 +83,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Workout workout = userService.createWorkoutForUser(id, dayName, workoutName);
-        if(workout == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Day doesn't exist");
+        try{
+            Workout workout = userService.createWorkoutForUser(id, dayName, workoutName);
+            return ResponseEntity.status(HttpStatus.CREATED).body(workout);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(workout);
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+        catch(NullPointerException e){
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PostMapping("/create/set")
     public ResponseEntity<?> createSet(HttpServletRequest request, 
-        @RequestBody GymSet gymSet, 
+        @RequestBody @Valid GymSet gymSet, 
         @RequestParam(required = true) String dayName, 
         @RequestParam(required = true) String workoutName){
             HttpSession session = request.getSession(false);
@@ -94,13 +105,13 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
             }
             UUID id = UUID.fromString(session.getAttribute("id").toString());
-            GymSet g = userService.createSetForUser(id, dayName, workoutName, gymSet);
-            if(g == null){
-                //This is gross, will eventually throw an exception with information about which wasn't found
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, or Workout doesn't exist");
+            try{
+                GymSet g = userService.createSetForUser(id, dayName, workoutName, gymSet);
+                return ResponseEntity.status(HttpStatus.CREATED).body(g);
             }
-            return ResponseEntity.status(HttpStatus.CREATED).body(g);
-               
+            catch(NullPointerException e){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }  
         }
 
     @GetMapping("/search/days")
@@ -110,11 +121,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        List<Day> days = userService.getDaysForUser(id);
-        if(days == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user or days");
+        try{
+            List<Day> days = userService.getDaysForUser(id);
+            return ResponseEntity.status(HttpStatus.OK).body(days);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(days);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
     
     @GetMapping("/search/day")
@@ -124,11 +137,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Day day = userService.getDayForUser(id,dayName);
-        if(day == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user or day");
+        try{
+            Day day = userService.getDayForUser(id,dayName);
+            return ResponseEntity.status(HttpStatus.OK).body(day);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(day);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/workouts")
@@ -138,11 +153,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        List<Workout> workouts = userService.getWorkoutsForUser(id,dayName);
-        if(workouts == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user, days, or workouts");
+        try{
+            List<Workout> workouts = userService.getWorkoutsForUser(id,dayName);
+            return ResponseEntity.status(HttpStatus.OK).body(workouts);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(workouts);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
     
     @GetMapping("/search/workout")
@@ -154,11 +171,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Workout workout = userService.getWorkoutForUser(id,dayName,workoutName);
-        if(workout == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user, days, or workout");
+        try{
+            Workout workout = userService.getWorkoutForUser(id,dayName,workoutName);
+            return ResponseEntity.status(HttpStatus.OK).body(workout);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(workout);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/sets")
@@ -171,11 +190,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        List<GymSet> sets = userService.getSetsForUser(id, dayName, workoutName, date);
-         if(sets == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user, days, workouts, or sets");
+        try{
+            List<GymSet> sets = userService.getSetsForUser(id, dayName, workoutName, date);
+            return ResponseEntity.status(HttpStatus.OK).body(sets);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(sets);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/search/all-sets")
@@ -187,11 +208,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        List<GymSet> sets = userService.getAllSetsForUser(id, dayName, workoutName);
-         if(sets == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Found no user, days, workouts, or sets");
+        try{
+            List<GymSet> sets = userService.getAllSetsForUser(id, dayName, workoutName);
+            return ResponseEntity.status(HttpStatus.OK).body(sets);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(sets);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/user")
@@ -201,11 +224,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        User updatedUser = userService.updateUserById(id, newUsername);
-        if(updatedUser == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        try{
+            User updatedUser = userService.updateUserById(id, newUsername);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/day")
@@ -217,11 +245,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Day updatedDay = userService.updateDayForUser(id, oldDayName, newDayName);
-        if(updatedDay == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or Day not found");
+        try{
+            Day updatedDay = userService.updateDayForUser(id, oldDayName, newDayName);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedDay);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedDay);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/workout")
@@ -234,29 +267,36 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Workout updatedWorkout = userService.updateWorkoutForUser(id, dayName, oldWorkoutName, newWorkoutName);
-        if(updatedWorkout == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, or Workout not found");
+        try{
+            Workout updatedWorkout = userService.updateWorkoutForUser(id, dayName, oldWorkoutName, newWorkoutName);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedWorkout);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedWorkout);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+        catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @PutMapping("/update/set/{setId}")
     public ResponseEntity<?> updateSet(HttpServletRequest request,
         @RequestParam(required = true) String dayName, 
         @RequestParam(required = true) String workoutName, 
-        @RequestBody(required = true) GymSet gymSet,
+        @RequestBody(required = true) @Valid GymSet gymSet,
         @PathVariable("setId") UUID setId){
         HttpSession session = request.getSession(false);
         if(session == null || session.getAttribute("id") == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        GymSet updatedSet = userService.updateGymsetForUser(id, dayName, workoutName,setId,gymSet);
-        if(updatedSet == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, Day, Workout, or Set not found");
+        try{
+            GymSet updatedSet = userService.updateGymsetForUser(id, dayName, workoutName,setId,gymSet);
+            return ResponseEntity.status(HttpStatus.OK).body(updatedSet);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(updatedSet);
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete")
@@ -267,7 +307,7 @@ public class UserController {
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
         Boolean result = userService.deleteUser(id);
-        if(!result||result == null){
+        if(!result){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
@@ -280,11 +320,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Boolean result = userService.deleteDay(id, dayName);
-        if(result == null||!result){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User or day not found");
+        try{
+            Boolean result = userService.deleteDay(id, dayName);
+            if(result){
+                return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Delete Failed");
         }
-        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/workout")
@@ -296,11 +341,16 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Boolean result = userService.deleteWorkout(id, dayName,workoutName);
-        if(result == null||!result){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, day, or workout not found");
+        try{
+            Boolean result = userService.deleteWorkout(id, dayName,workoutName);
+            if(result){
+                return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Delete Failed");
         }
-        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete/set/{setId}")
@@ -313,10 +363,15 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login first");
         }
         UUID id = UUID.fromString(session.getAttribute("id").toString());
-        Boolean result = userService.deleteSet(id, dayName,workoutName,setId);
-        if(result == null||!result){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User, day, workout, or set not found");
+        try{
+            Boolean result = userService.deleteSet(id, dayName,workoutName,setId);
+            if(result){
+                return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Delete Failed");
         }
-        return ResponseEntity.status(HttpStatus.OK).body("Delete Successful");
+        catch(NullPointerException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }
